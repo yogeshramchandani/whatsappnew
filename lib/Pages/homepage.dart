@@ -1,9 +1,13 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:whatsappnew/Utils/colors.dart';
-import 'package:whatsappnew/calls.dart';
-import 'package:whatsappnew/cmmunities.dart';
-import 'package:whatsappnew/homepagepersons.dart';
-import 'package:whatsappnew/updates.dart';
+import 'package:whatsappnew/Pages/addpersons.dart';
+import 'package:whatsappnew/Pages/calls.dart';
+import 'package:whatsappnew/Pages/cmmunities.dart';
+import 'package:whatsappnew/Pages/homepagepersons.dart';
+import 'package:whatsappnew/providers.dart';
+import 'package:whatsappnew/Pages/updates.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -13,41 +17,18 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  PageController pgcontlr = PageController();
   String? title;
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      switch (index) {
-        case 0:
-          title = "WhatsApp";
-          break;
-        case 1:
-          title = "Updates";
-          break;
-        case 2:
-          title = "Communities";
-          break;
-        case 3:
-          title = "Calls";
-          break;
-        default:
-          title = "WhatsApp";
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    chatprovider provideer = Provider.of<chatprovider>(context);
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
-        enableFeedback: false,
-        useLegacyColorScheme: false,
-        items: const [
-          BottomNavigationBarItem(
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (value) => provideer.onItemTapped(value),
+        selectedIndex: provideer.selectedindex,
+        destinations: const [
+          NavigationDestination(
             icon: Badge(
               backgroundColor: Appcolors.Lightgreen,
               label: Text("2"),
@@ -55,33 +36,24 @@ class _MainPageState extends State<MainPage> {
             ),
             label: "Chats",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.sync_rounded),
-            label: "Updates",
-          ),
-          BottomNavigationBarItem(
+          NavigationDestination(
+              icon: Icon(Icons.sync_rounded), label: "Updates"),
+          NavigationDestination(
             icon: Icon(Icons.groups_2_outlined),
             label: "Communities",
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.call_outlined),
             label: "Calls",
-          ),
+          )
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Appcolors.Tealgreen,
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
-        unselectedItemColor: const Color.fromARGB(255, 0, 0, 0),
-        unselectedLabelStyle:
-            TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
-        showUnselectedLabels: true,
-        onTap: _onItemTapped,
       ),
       appBar: AppBar(
+        leading: null,
         iconTheme: const IconThemeData(color: Color.fromARGB(255, 0, 0, 0)),
         title: Text(
-          title ?? "WhatsApp",
-          style: TextStyle(
+          provideer.title,
+          style: const TextStyle(
             color: Appcolors.Lightgreen,
             fontSize: 25,
             fontWeight: FontWeight.w600,
@@ -103,7 +75,7 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
           PopupMenuButton(
-            offset: Offset(0, 50),
+            offset: const Offset(0, 50),
             color: const Color.fromARGB(255, 255, 255, 255),
             itemBuilder: ((context) => <PopupMenuEntry>[
                   const PopupMenuItem(
@@ -140,10 +112,18 @@ class _MainPageState extends State<MainPage> {
           )
         ],
       ),
-      body: _buildBody(),
+      body: PageView(
+          scrollDirection: Axis.horizontal,
+          controller: pgcontlr,
+          children: [_buildBody()],
+          onPageChanged: (index) => provideer.onItemTapped(index)),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Appcolors.Lightgreen,
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return AddNewChats();
+          }));
+        },
         child: const Icon(
           Icons.message,
           color: Colors.white,
@@ -153,17 +133,18 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildBody() {
-    switch (_selectedIndex) {
+    chatprovider provideer = Provider.of<chatprovider>(context);
+    switch (provideer.selectedindex) {
       case 0:
         return homepageChats();
       case 1:
         return statusPage();
       case 2:
-        return communities();
+        return const communities();
       case 3:
-        return callspage();
+        return const callspage();
       default:
-        return homepageChats();
+        return const Placeholder();
     }
   }
 }

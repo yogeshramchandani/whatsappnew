@@ -1,8 +1,20 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:whatsappnew/homepage.dart';
+import 'package:provider/provider.dart';
+import 'package:whatsappnew/Pages/LoginPage.dart';
+import 'package:whatsappnew/Pages/homepage.dart';
+import 'package:whatsappnew/providers.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:whatsappnew/services/firebase_options.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 void main() async {
-  runApp(const Myapp());
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(MultiProvider(
+    providers: [ChangeNotifierProvider(create: (context) => chatprovider())],
+    child: const Myapp(),
+  ));
 }
 
 class Myapp extends StatefulWidget {
@@ -23,7 +35,7 @@ class _MyappState extends State<Myapp> {
         primaryColor: Color(0xFF075E54),
         brightness: Brightness.light,
       ),
-      home: MainPage(),
+      home: LoginPage(),
     );
   }
 }
